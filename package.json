@@ -1,0 +1,23 @@
+{
+  "name": "xinsheng-api",
+  "version": "1.0.0",
+  "description": "鑫盛api",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.6.3"
+  }
+}
