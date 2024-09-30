@@ -2,7 +2,7 @@ const express = require("express");
 const { mongoose } = require("./dataBase");
 const loginRouter = require("./routers/login");
 const registerRouter = require("./routers/register");
-const { jwtCheck } = require('./utils/jwt')
+const userInfoRouter = require("./routers/userInfo");
 
 const app = express();
 
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api", loginRouter); // 注入登录路由模块
 app.use("/api", registerRouter);
-app.use(jwtCheck)
+app.use("/api", userInfoRouter)
 
 app.listen('8889', 'localhost', () => {
   console.log("启动成功")
