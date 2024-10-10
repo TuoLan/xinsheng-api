@@ -3,6 +3,7 @@ const { mongoose } = require("./dataBase");
 const loginRouter = require("./routers/login");
 const registerRouter = require("./routers/register");
 const userInfoRouter = require("./routers/userInfo");
+const orderRouter = require("./routers/order");
 
 const app = express();
 
@@ -21,9 +22,10 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api", loginRouter); // 注入登录路由模块
 app.use("/api", registerRouter);
-app.use("/api", userInfoRouter)
+app.use("/api", userInfoRouter);
+app.use("/api", orderRouter);
 
-app.listen('8889', 'localhost', () => {
+app.listen('8889', '0.0.0.0', () => {
   console.log("启动成功")
 })
 

@@ -8,6 +8,7 @@ router.post("/register", (req, res) => {
   const addData = {
     username,
     password,
+    userType: "person",
     createTime: new Date()
   }
 
