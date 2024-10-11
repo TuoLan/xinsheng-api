@@ -19,8 +19,14 @@ const OrderSchema = new mongoose.Schema({
 const orderCollection = mongoose.model('order', OrderSchema, 'order');
 
 router.get("/getOrderList", jwtCheck, async (req, res) => {
+  const { status } = req.query
   const { username, userType } = req.userInfo
-  const whereStr = userType === 'admin' ? {} : { "creater.username": username };
+  let whereStr = {}
+  if (!status || status === 'all') {
+    whereStr = userType === 'admin' ? {} : { "creater.username": username };
+  } else {
+    whereStr = userType === 'admin' ? { status } : { "creater.username": username, status };
+  }
   const datas = await orderCollection.find(whereStr).sort({ createdTime: -1 });
   res.send({
     code: 'ok',
