@@ -4,6 +4,7 @@ const loginRouter = require("./routers/login");
 const registerRouter = require("./routers/register");
 const userInfoRouter = require("./routers/userInfo");
 const orderRouter = require("./routers/order");
+const bodyParser = require("body-parser");
 const cors = require('cors');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 
 // 路由配置

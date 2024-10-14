@@ -1,42 +1,51 @@
 const express = require("express");
-const { db } = require("../dataBase");
-let userCollection = db.collection('user')
-//引入生成token
-const jwt = require('jsonwebtoken')
-const router = express.Router(); //模块化路由
+const mongoose = require('mongoose'); // 确保引入 mongoose
+const jwt = require('jsonwebtoken');
+const router = express.Router(); // 模块化路由
 
-router.post("/login", (req, res) => {
-  const { username, password } = req.body
-  const addData = {
-    username,
-    password,
-    createTime: new Date()
-  }
-  //从表中查询账号
-  userCollection.findOne({ username: addData.username }, (err, data) => {
-    if (data) {
-      if (data.password === password) {
-        let token = jwt.sign(data, 'wx', { expiresIn: '1h' });
+// 定义用户模型
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  userType: { type: String, required: false },
+  createTime: { type: Date, required: false },
+  address: { type: Object, required: false },
+  nickname: { type: String, required: false },
+  phoneNumber: { type: String, required: true }
+});
+const User = mongoose.model('User', UserSchema, 'user'); // 创建用户模型
+
+router.post("/login", async (req, res) => {
+  const { username, phoneNumber, password } = req.body;
+  // 从数据库中查找用户
+  const usersUser = await User.findOne({ username }).exec();
+  const phonesUser = await User.findOne({ phoneNumber }).exec();
+  const user = usersUser || phonesUser
+
+  if (user) {
+    // 验证密码
+    if (user.password === password) {
+      // 生成 token
+      const token = jwt.sign({ id: user._id, username: user.username }, 'wx', { expiresIn: '30d' });
         res.send({
           code: 'ok',
-          msg: '登陆成功',
+          msg: '登录成功',
           data: token
-        })
+        });
       } else {
         res.send({
           code: 'err',
-          msg: '用户名/密码错误',
-          data: err
-        })
+          msg: '用户名/手机号/密码错误',
+          data: null
+        });
       }
     } else {
       res.send({
         code: 'err',
         msg: '用户名不存在',
-        data: err
-      })
-    }
-  })
+        data: null
+      });
+  }
 });
 
 module.exports = router;
