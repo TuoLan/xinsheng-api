@@ -1,5 +1,6 @@
 const express = require("express");
 const { jwtCheck } = require("../utils/jwt")
+const paginate = require("../utils/paginationHelper")
 const router = express.Router(); //模块化路由
 const { db } = require("../dataBase");
 let userCollection = db.collection('user')
@@ -12,14 +13,15 @@ const OrderSchema = new mongoose.Schema({
   reservationTime: { type: Date, required: true },
   paymentType: { type: String, required: true },
   createdTime: { type: Date, required: true },
-  creater: { type: Object, required: true }, // 确保 creater 字段的结构
-  // 其他字段可以根据需要添加
+  creater: { type: Object, required: true },
+  reasonDetail: { type: String, required: false },
+  details: { type: String, required: false },
 });
 
 const orderCollection = mongoose.model('order', OrderSchema, 'order');
 
 router.get("/getOrderList", jwtCheck, async (req, res) => {
-  const { status } = req.query
+  const { page, pageSize, status } = req.query
   const { username, userType } = req.userInfo
   let whereStr = {}
   if (!status || status === 'all') {
@@ -27,7 +29,8 @@ router.get("/getOrderList", jwtCheck, async (req, res) => {
   } else {
     whereStr = userType === 'admin' ? { status } : { "creater.username": username, status };
   }
-  const datas = await orderCollection.find(whereStr).sort({ createdTime: -1 });
+  const datas = await paginate(orderCollection, page, pageSize, whereStr, { createdTime: -1 });
+  // const datas = await orderCollection.find(whereStr).sort({ createdTime: -1 });
   res.send({
     code: 'ok',
     msg: '操作成功',
@@ -50,7 +53,23 @@ router.get("/getOrderDetail", jwtCheck, async (req, res) => {
 router.post("/saveOrder", jwtCheck, async (req, res) => {
   const { username } = req.userInfo;
   const { _id, ...saveBody } = req.body;
+  let sumNum = saveBody.smallNum + saveBody.bigNum
 
+  if (sumNum < 20) {
+    return res.send({
+      code: 'err',
+      msg: '货值总和(大杯+小杯)需大于等于20杯!',
+      data: null
+    });
+  }
+
+  if ((new Date()) > (new Date(saveBody.reservationTime)) && saveBody.status === 'ordered') {
+    return res.send({
+      code: 'err',
+      msg: '预约配送时间超过当前时间，请修改！',
+      data: null
+    });
+  }
   try {
     saveBody.reservationTime = new Date(saveBody.reservationTime).toISOString();
 
