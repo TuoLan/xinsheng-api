@@ -1,19 +1,7 @@
 const express = require("express");
-const mongoose = require('mongoose'); // 确保引入 mongoose
 const jwt = require('jsonwebtoken');
 const router = express.Router(); // 模块化路由
-
-// 定义用户模型
-const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  password: { type: String, required: true },
-  userType: { type: String, required: false },
-  createTime: { type: Date, required: false },
-  address: { type: Object, required: false },
-  nickname: { type: String, required: false },
-  phoneNumber: { type: String, required: true }
-});
-const User = mongoose.model('User', UserSchema, 'user'); // 创建用户模型
+const User = require('../models/User');
 
 router.post("/login", async (req, res) => {
   const { username, phoneNumber, password } = req.body;

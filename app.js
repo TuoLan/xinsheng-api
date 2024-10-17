@@ -1,30 +1,22 @@
 const express = require("express");
-const { mongoose } = require("./dataBase");
+const app = express();
+const mongoose = require('mongoose')
 const loginRouter = require("./routers/login");
 const registerRouter = require("./routers/register");
 const userInfoRouter = require("./routers/userInfo");
 const orderRouter = require("./routers/order");
 const bodyParser = require("body-parser");
-const cors = require('cors');
 
-const app = express();
+mongoose.connect('mongodb://xinsheng:welcome1@81.71.49.35/xinsheng?retryWrites=true&w=majority&appName=Cluster0')
 
-// CORS 配置，允许多个来源
-const allowedOrigins = ['http://localhost:5173', 'http://175.178.215.129'];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // 如果请求来源在 allowedOrigins 列表中，或者没有来源（例如本地开发时的非浏览器请求），则允许
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true  // 如果你需要支持 cookie 等凭据
-}));
+// 仅开放环境使用：允许 CORS 请求
+// const cors = require("cors");
+// app.use(cors({
+//   origin: '*', // 允许的前端地址
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 允许的方法
+//   allowedHeaders: ['Content-Type', 'Authorization'], // 允许的头
+//   credentials: true // 支持 cookie 传递等认证信息
+// }));
 
 app.use(express.json());
 app.use(bodyParser.json());

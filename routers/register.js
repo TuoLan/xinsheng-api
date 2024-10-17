@@ -1,30 +1,15 @@
 const express = require("express");
-const { db } = require("../dataBase");
 const IHuyi = require("../utils/msg")
 const router = express.Router(); //模块化路由
-const mongoose = require('mongoose');
-const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  password: { type: String, required: true },
-  userType: { type: String, required: false },
-  createTime: { type: Date, required: false },
-  address: { type: Object, required: false },
-  nickname: { type: String, required: false },
-  phoneNumber: { type: String, required: true }
-})
-const VerifCodeSchema = new mongoose.Schema({
-  phoneNumber: { type: String, required: true },
-  verifCode: { type: String, required: true }
-})
-const userCollection = mongoose.model('user', UserSchema, 'user');
-const verifcodeCollection = mongoose.model('verifcode', VerifCodeSchema, 'verifcode');
+const User = require('../models/User');
+const VerifCode = require('../models/VerifCode');
 
 router.post("/getVerifCode", async (req, res) => {
   const msgObj = new IHuyi('C76708893', '94505b752d0a28753c4a7ecace23374e')
   const { phoneNumber } = req.body
   // 生成6位随机数字验证码并保存
   const code = String(Math.floor(100000 + Math.random() * 900000))
-  await verifcodeCollection.findOneAndUpdate(
+  await VerifCode.findOneAndUpdate(
     { phoneNumber },
     { verifCode: code },
     { new: true, upsert: true }
@@ -48,7 +33,7 @@ router.post("/register", async (req, res) => {
     createTime: new Date()
   }
 
-  const verifCodeEntry = await verifcodeCollection.findOne({ phoneNumber });
+  const verifCodeEntry = await VerifCode.findOne({ phoneNumber });
   if (!verifCodeEntry || verifCodeEntry.verifCode !== verifCode) {
     return res.send({
       code: 'err',
@@ -57,7 +42,7 @@ router.post("/register", async (req, res) => {
     });
   }
 
-  const existingUserByPhone = await userCollection.findOne({ phoneNumber: addData.phoneNumber });
+  const existingUserByPhone = await User.findOne({ phoneNumber: addData.phoneNumber });
   if (existingUserByPhone) {
     return res.send({
       code: 'err',
@@ -67,7 +52,7 @@ router.post("/register", async (req, res) => {
   }
 
   //从表中查询账号
-  const existingUser = await userCollection.findOne({ username: addData.username });
+  const existingUser = await User.findOne({ username: addData.username });
   if (existingUser) {
     return res.send({
       code: 'err',
@@ -77,7 +62,7 @@ router.post("/register", async (req, res) => {
   }
 
   // 插入新用户
-  const newUser = await userCollection.create(addData); // 使用 create() 方法插入
+  const newUser = await User.create(addData); // 使用 create() 方法插入
   res.send({
     code: 'ok',
     msg: '注册成功',

@@ -2,23 +2,9 @@ const express = require("express");
 const { jwtCheck } = require("../utils/jwt")
 const paginate = require("../utils/paginationHelper")
 const router = express.Router(); //模块化路由
-const { db } = require("../dataBase");
-let userCollection = db.collection('user')
 const mongoose = require('mongoose');
-
-const OrderSchema = new mongoose.Schema({
-  bigNum: { type: Number, require: true },
-  smallNum: { type: Number, require: true },
-  status: { type: String, required: true },
-  reservationTime: { type: Date, required: true },
-  paymentType: { type: String, required: true },
-  createdTime: { type: Date, required: true },
-  creater: { type: Object, required: true },
-  reasonDetail: { type: String, required: false },
-  details: { type: String, required: false },
-});
-
-const orderCollection = mongoose.model('order', OrderSchema, 'order');
+const User = require('../models/User');
+const Order = require('../models/Order')
 
 router.get("/getOrderList", jwtCheck, async (req, res) => {
   const { page, pageSize, status } = req.query
@@ -29,8 +15,8 @@ router.get("/getOrderList", jwtCheck, async (req, res) => {
   } else {
     whereStr = userType === 'admin' ? { status } : { "creater.username": username, status };
   }
-  const datas = await paginate(orderCollection, page, pageSize, whereStr, { createdTime: -1 });
-  // const datas = await orderCollection.find(whereStr).sort({ createdTime: -1 });
+  const datas = await paginate(Order, page, pageSize, whereStr, { createdTime: -1 });
+  // const datas = await Order.find(whereStr).sort({ createdTime: -1 });
   res.send({
     code: 'ok',
     msg: '操作成功',
@@ -42,7 +28,7 @@ router.get("/getOrderDetail", jwtCheck, async (req, res) => {
   const { id } = req.query
   const whereId = new mongoose.Types.ObjectId(id);
   const whereStr = { "_id": whereId };
-  const datas = await orderCollection.findOne(whereStr)
+  const datas = await Order.findOne(whereStr)
   res.send({
     code: 'ok',
     msg: '操作成功',
@@ -79,7 +65,7 @@ router.post("/saveOrder", jwtCheck, async (req, res) => {
       saveBody.creater._id = new mongoose.Types.ObjectId(String(saveBody.creater._id));
       saveBody.createdTime = new Date(saveBody.createdTime).toISOString();
       // 使用 findOneAndUpdate 获取更新后的文档
-      const updatedOrder = await orderCollection.findOneAndUpdate(
+      const updatedOrder = await Order.findOneAndUpdate(
         { _id: whereId },
         { $set: saveBody },
         { new: true } // 返回更新后的文档
@@ -101,7 +87,7 @@ router.post("/saveOrder", jwtCheck, async (req, res) => {
     } else {
       // TODO: 新增
       // 查找用户
-      const user = await userCollection.findOne({ username });
+      const user = await User.findOne({ username });
       const currentTime = new Date()
       if (!(user.phoneNumber && user.address && user.address.detail)) {
         return res.send({
@@ -111,7 +97,7 @@ router.post("/saveOrder", jwtCheck, async (req, res) => {
         });
       }
       // 创建新订单
-      const newOrder = new orderCollection({
+      const newOrder = new Order({
         ...saveBody,
         creater: user,
         createdTime: currentTime.toISOString()
