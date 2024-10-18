@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   address: { type: Object, required: false },
   nickname: { type: String, required: false },
   phoneNumber: { type: String, required: true },
+  businessLicense: { type: String, require: false }
 });
 
 const User = mongoose.model('User', UserSchema, 'user'); // 使用 'User' 作为模型名称

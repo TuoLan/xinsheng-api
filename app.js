@@ -5,6 +5,7 @@ const loginRouter = require("./routers/login");
 const registerRouter = require("./routers/register");
 const userInfoRouter = require("./routers/userInfo");
 const orderRouter = require("./routers/order");
+const uploadRouter = require("./routers/upload")
 const bodyParser = require("body-parser");
 
 mongoose.connect('mongodb://xinsheng:welcome1@81.71.49.35/xinsheng?retryWrites=true&w=majority&appName=Cluster0')
@@ -27,6 +28,7 @@ app.use("/api", loginRouter);
 app.use("/api", registerRouter);
 app.use("/api", userInfoRouter);
 app.use("/api", orderRouter);
+app.use("/api", uploadRouter)
 
 // 启动服务器
 app.listen('8889', '0.0.0.0', () => {

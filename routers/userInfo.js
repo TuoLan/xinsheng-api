@@ -15,6 +15,7 @@ router.get("/userInfo", jwtCheck, (req, res) => {
 router.post("/updateUserInfo", jwtCheck, (req, res) => {
   delete req.userInfo._id
   delete req.body._id
+  if (req.body.businessLicense) req.body.userType = 'merchant'
   const saveDatas = Object.assign(req.userInfo, req.body)
   User.updateOne({ username: req.body.username }, { $set: saveDatas }).then(resp => {
     res.send({
